@@ -180,8 +180,8 @@
   </div>
 
   <script>
-    // MASUKKAN URL WEB APP ANDA DI SINI !!! (PENTING)
-    const SCRIPT_URL = 'MASUKKAN_URL_WEB_APP_APPSCRIPT_DI_SINI';
+    // URL WEB APP APPSCRIPT
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyDO_O-D3xKngVFFUrvT3oxVZ8gPYQtKCd71HG_2pfSt-8B702mc41xQmA6GdkH0SU2/exec';
     
     let tomSelectInstance = null;
     let globalSlsData = []; 
@@ -190,7 +190,6 @@
     document.addEventListener("DOMContentLoaded", function() {
       document.getElementById('loadingText').classList.remove('hidden');
 
-      // MENGUBAH google.script.run MENJADI fetch() API PANGGILAN GET
       fetch(SCRIPT_URL + '?action=getDaftarNamaMitra')
         .then(response => response.json())
         .then(response => {
@@ -245,7 +244,6 @@
       document.getElementById('btnToggleDetail').innerHTML = 'Cek Detail Hasil Syarat Pembayaran <span class="text-orange-400 ml-2">&darr;</span>';
       document.getElementById('btnToggleSls').innerHTML = 'Cek Keterangan per SLS <span class="text-slate-400 ml-2">&darr;</span>';
 
-      // MENGUBAH google.script.run MENJADI fetch() API PANGGILAN GET
       fetch(SCRIPT_URL + '?action=getDataByNama&nama=' + encodeURIComponent(nama))
         .then(response => response.json())
         .then(response => {
