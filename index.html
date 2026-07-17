@@ -24,10 +24,6 @@
     .ts-control.focus { box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.3) !important; border-color: #f97316 !important; background-color: #ffffff !important; }
     .ts-dropdown { border-radius: 0.75rem !important; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2) !important; border: 1px solid #fed7aa !important; z-index: 50 !important; }
     .ts-dropdown .option { white-space: normal !important; word-wrap: break-word; padding: 10px 12px !important; border-bottom: 1px solid #ffedd5; }
-    
-    .custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
-    .custom-scroll::-webkit-scrollbar-track { background: #fff7ed; border-radius: 8px; }
-    .custom-scroll::-webkit-scrollbar-thumb { background: #fdba74; border-radius: 8px; }
   </style>
 </head>
 <body class="text-slate-800 antialiased min-h-screen p-4 sm:p-6 md:p-8 flex justify-center items-start pt-10">
@@ -130,17 +126,26 @@
           </a>
         </div>
 
+        <!-- CONTAINER CATATAN (Dinamis Muncul Dibawah Link Berkas) -->
+        <div id="containerCatatan" class="hidden mt-4 bg-orange-50 border border-orange-200 rounded-xl p-5 shadow-sm text-sm animate-[fadeIn_0.5s_ease-in-out]">
+          <div class="mb-4">
+            <span class="text-slate-500 block text-[11px] uppercase tracking-wider font-bold mb-1">Catatan Pemeriksaan Upload</span>
+            <span id="d_catatanUpload" class="font-bold text-slate-800 leading-relaxed block bg-white p-3 rounded-lg border border-orange-100">-</span>
+          </div>
+          <div>
+            <span class="text-slate-500 block text-[11px] uppercase tracking-wider font-bold mb-1">Tanggal Penandatangan Berkas</span>
+            <span id="d_tglTtd" class="font-bold text-slate-800 leading-relaxed block bg-white p-3 rounded-lg border border-orange-100">-</span>
+          </div>
+        </div>
+
       </div>
     </div>
   </div>
 
   <script>
-    // URL WEB APP APPSCRIPT ANDA:
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyDO_O-D3xKngVFFUrvT3oxVZ8gPYQtKCd71HG_2pfSt-8B702mc41xQmA6GdkH0SU2/exec';
     
     let tomSelectInstance = null;
-    let globalSlsData = []; 
-    let globalKedudukan = "";
 
     document.addEventListener("DOMContentLoaded", function() {
       document.getElementById('loadingText').classList.remove('hidden');
@@ -219,9 +224,6 @@
     }
 
     function tampilkanHasil(data) {
-      globalSlsData = data.slsData || [];
-      globalKedudukan = data.kedudukan.toString().toUpperCase();
-
       document.getElementById('r_namaSingkat').innerText = data.namaMitra;
       document.getElementById('r_jabatan').innerText = data.kedudukan;
 
@@ -234,7 +236,7 @@
       const sMuatan = (data.syaratMuatan || "").toString().trim().toUpperCase();
       const sSls = (data.syaratSls || "").toString().trim().toUpperCase();
       const sUnder = (data.syaratUndercoverage || "").toString().trim().toUpperCase();
-      const isPML = globalKedudukan.includes('PML');
+      const isPML = data.kedudukan.toString().toUpperCase().includes('PML');
 
       statusBox.className = 'p-6 rounded-3xl card-shadow mb-4 text-center border relative overflow-hidden z-10';
 
@@ -278,6 +280,32 @@
         statusMessage.className = 'text-sm leading-relaxed relative z-10 font-medium text-rose-700';
         statusMessage.innerHTML = "Mohon maaf, capaian Anda saat ini belum memenuhi kriteria pencairan Termin I. Cek detail di bawah untuk melengkapi kekurangan Anda ya.";
         btnLinkBerkas.classList.add('hidden');
+      }
+
+      // Logika Menampilkan Catatan & Tanggal TTD
+      const catatanUpload = (data.catatanUpload || "").toString().trim();
+      const tglData = (data.tglTtd || "").toString().trim();
+      
+      let teksCatatan = catatanUpload === "" ? "-" : catatanUpload;
+      let teksTglTtd = "";
+
+      if (catatanUpload === "") {
+        teksTglTtd = "Sedang Diperiksa, Mohon Diperiksa secara berkala";
+      } else if (catatanUpload.toLowerCase() === "berkas-berkas sudah tepat. good job") {
+        teksTglTtd = (tglData !== "" ? tglData : "Belum ditentukan") + ", Silahkan datang ke kantor BPS Kabupaten Lombok Barat";
+      } else {
+        teksTglTtd = "Terdapat kesalahan isian berkas, perbaiki kembali isian berkas pembayaran pada link diatas";
+      }
+
+      document.getElementById('d_catatanUpload').innerText = teksCatatan;
+      document.getElementById('d_tglTtd').innerText = teksTglTtd;
+
+      // Container catatan hanya muncul bila memenuhi syarat (Tanpa / Dengan)
+      const containerCatatan = document.getElementById('containerCatatan');
+      if (isMemenuhiTanpaSyarat || isMemenuhiDenganSyarat) {
+        containerCatatan.classList.remove('hidden');
+      } else {
+        containerCatatan.classList.add('hidden');
       }
 
       document.getElementById('d_kecamatan').innerText = data.kecamatan;
