@@ -129,12 +129,13 @@
         <!-- CONTAINER CATATAN (Dinamis Muncul Dibawah Link Berkas) -->
         <div id="containerCatatan" class="hidden mt-4 bg-orange-50 border border-orange-200 rounded-xl p-5 shadow-sm text-sm animate-[fadeIn_0.5s_ease-in-out]">
           <div class="mb-4">
-            <span class="text-slate-500 block text-[11px] uppercase tracking-wider font-bold mb-1">Catatan Pemeriksaan Upload</span>
+            <span class="text-orange-800 block text-[11px] uppercase tracking-wider font-bold mb-1">Catatan Pemeriksaan</span>
             <span id="d_catatanUpload" class="font-bold text-slate-800 leading-relaxed block bg-white p-3 rounded-lg border border-orange-100">-</span>
           </div>
           <div>
-            <span class="text-slate-500 block text-[11px] uppercase tracking-wider font-bold mb-1">Tanggal Penandatangan Berkas</span>
-            <span id="d_tglTtd" class="font-bold text-slate-800 leading-relaxed block bg-white p-3 rounded-lg border border-orange-100">-</span>
+            <span class="text-orange-800 block text-[11px] uppercase tracking-wider font-bold mb-1">Tanggal Penandatangan Berkas</span>
+            <!-- Span id d_tglTtd akan disuntikkan HTML dinamis -->
+            <span id="d_tglTtd" class="leading-relaxed block p-4 rounded-xl border border-orange-100 shadow-sm transition-all">-</span>
           </div>
         </div>
 
@@ -143,6 +144,7 @@
   </div>
 
   <script>
+    // URL WEB APP APPSCRIPT ANDA:
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyDO_O-D3xKngVFFUrvT3oxVZ8gPYQtKCd71HG_2pfSt-8B702mc41xQmA6GdkH0SU2/exec';
     
     let tomSelectInstance = null;
@@ -282,23 +284,45 @@
         btnLinkBerkas.classList.add('hidden');
       }
 
-      // Logika Menampilkan Catatan & Tanggal TTD
+      // ==========================================
+      // LOGIKA DESAIN KOTAK TANGGAL DAN CATATAN
+      // ==========================================
       const catatanUpload = (data.catatanUpload || "").toString().trim();
       const tglData = (data.tglTtd || "").toString().trim();
       
       let teksCatatan = catatanUpload === "" ? "-" : catatanUpload;
-      let teksTglTtd = "";
+      const boxTglTtd = document.getElementById('d_tglTtd');
 
       if (catatanUpload === "") {
-        teksTglTtd = "Sedang Diperiksa, Mohon Diperiksa secara berkala";
-      } else if (catatanUpload.toLowerCase() === "berkas-berkas sudah tepat. good job") {
-        teksTglTtd = (tglData !== "" ? tglData : "Belum ditentukan") + ", Silahkan datang ke kantor BPS Kabupaten Lombok Barat";
-      } else {
-        teksTglTtd = "Terdapat kesalahan isian berkas, perbaiki kembali isian berkas pembayaran pada link diatas";
+        // Kondisi Kosong (Menunggu)
+        boxTglTtd.innerHTML = `
+          <div class="flex items-center gap-2 text-slate-500">
+            <svg class="w-5 h-5 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <span class="font-medium italic">Sedang Diperiksa, Mohon Diperiksa secara berkala</span>
+          </div>`;
+        boxTglTtd.className = "leading-relaxed block p-4 rounded-xl border border-slate-200 bg-slate-50 shadow-sm transition-all";
+      } 
+      else if (catatanUpload.toLowerCase() === "berkas-berkas sudah tepat. good job") {
+        // Kondisi Lolos (Hijau)
+        let tglStr = tglData !== "" ? tglData : "Belum ditentukan";
+        boxTglTtd.innerHTML = `
+          <div class="text-emerald-700 font-extrabold text-lg mb-1">${tglStr}</div>
+          <div class="text-emerald-800 text-xs font-bold bg-emerald-200/60 inline-block px-3 py-1.5 rounded-lg border border-emerald-300 shadow-sm">
+            Silahkan datang ke kantor BPS Kabupaten Lombok Barat
+          </div>`;
+        boxTglTtd.className = "leading-relaxed block p-4 rounded-xl border-2 border-emerald-300 bg-emerald-50 shadow-md transition-all";
+      } 
+      else {
+        // Kondisi Revisi (Merah)
+        boxTglTtd.innerHTML = `
+          <div class="flex items-start gap-2 text-rose-700">
+            <svg class="w-5 h-5 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+            <span class="font-bold">Terdapat kesalahan isian berkas, perbaiki kembali isian berkas pembayaran pada link di atas</span>
+          </div>`;
+        boxTglTtd.className = "leading-relaxed block p-4 rounded-xl border-2 border-rose-300 bg-rose-50 shadow-md transition-all";
       }
 
       document.getElementById('d_catatanUpload').innerText = teksCatatan;
-      document.getElementById('d_tglTtd').innerText = teksTglTtd;
 
       // Container catatan hanya muncul bila memenuhi syarat (Tanpa / Dengan)
       const containerCatatan = document.getElementById('containerCatatan');
