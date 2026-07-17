@@ -126,17 +126,30 @@
           </a>
         </div>
 
-        <!-- CONTAINER CATATAN (Dinamis Muncul Dibawah Link Berkas) -->
-        <div id="containerCatatan" class="hidden mt-4 bg-orange-50 border border-orange-200 rounded-xl p-5 shadow-sm text-sm animate-[fadeIn_0.5s_ease-in-out]">
-          <div class="mb-4">
-            <span class="text-orange-800 block text-[11px] uppercase tracking-wider font-bold mb-1">Catatan Pemeriksaan</span>
-            <span id="d_catatanUpload" class="font-bold text-slate-800 leading-relaxed block bg-white p-3 rounded-lg border border-orange-100">-</span>
+        <!-- CONTAINER CATATAN (White Box, Shadow, Eye-Catching) -->
+        <div id="containerCatatan" class="hidden mt-4 bg-white border-2 border-orange-200 rounded-2xl p-5 shadow-lg shadow-orange-100 text-sm animate-[fadeIn_0.5s_ease-in-out]">
+          
+          <!-- Block Normal (Muncul jika sudah upload) -->
+          <div id="catatanNormal">
+            <div class="mb-4">
+              <span class="text-orange-800 block text-[11px] uppercase tracking-wider font-bold mb-1">Catatan Pemeriksaan</span>
+              <span id="d_catatanUpload" class="font-bold text-slate-700 leading-relaxed block bg-slate-50 p-3 rounded-lg border border-slate-200">-</span>
+            </div>
+            <div>
+              <span class="text-orange-800 block text-[11px] uppercase tracking-wider font-bold mb-1">Tanggal Penandatangan Berkas</span>
+              <!-- Span id d_tglTtd akan disuntikkan HTML dinamis dengan warna hijau/merah -->
+              <span id="d_tglTtd" class="leading-relaxed block p-4 rounded-xl border border-orange-100 shadow-sm transition-all">-</span>
+            </div>
           </div>
-          <div>
-            <span class="text-orange-800 block text-[11px] uppercase tracking-wider font-bold mb-1">Tanggal Penandatangan Berkas</span>
-            <!-- Span id d_tglTtd akan disuntikkan HTML dinamis -->
-            <span id="d_tglTtd" class="leading-relaxed block p-4 rounded-xl border border-orange-100 shadow-sm transition-all">-</span>
+
+          <!-- Block Warning (Muncul jika "Belum Isi") -->
+          <div id="catatanPeringatan" class="hidden text-center py-5 flex flex-col items-center justify-center gap-3">
+             <div class="bg-rose-100 text-rose-500 p-3 rounded-full animate-bounce">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+             </div>
+             <span class="text-rose-600 font-black text-lg uppercase tracking-widest text-center drop-shadow-sm">UPLOAD BERKAS WOY, KLIK LINK DIATAS</span>
           </div>
+
         </div>
 
       </div>
@@ -285,16 +298,21 @@
       }
 
       // ==========================================
-      // LOGIKA DESAIN KOTAK TANGGAL DAN CATATAN
+      // LOGIKA TANGGAL, CATATAN & SS FASIH
       // ==========================================
       const catatanUpload = (data.catatanUpload || "").toString().trim();
       const tglData = (data.tglTtd || "").toString().trim();
+      const ssFasih = (data.ssFasih || "").toString().trim().toLowerCase();
+      
+      const containerCatatan = document.getElementById('containerCatatan');
+      const catatanNormal = document.getElementById('catatanNormal');
+      const catatanPeringatan = document.getElementById('catatanPeringatan');
       
       let teksCatatan = catatanUpload === "" ? "-" : catatanUpload;
       const boxTglTtd = document.getElementById('d_tglTtd');
 
       if (catatanUpload === "") {
-        // Kondisi Kosong (Menunggu)
+        // Kosong
         boxTglTtd.innerHTML = `
           <div class="flex items-center gap-2 text-slate-500">
             <svg class="w-5 h-5 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
@@ -303,17 +321,17 @@
         boxTglTtd.className = "leading-relaxed block p-4 rounded-xl border border-slate-200 bg-slate-50 shadow-sm transition-all";
       } 
       else if (catatanUpload.toLowerCase() === "berkas-berkas sudah tepat. good job") {
-        // Kondisi Lolos (Hijau)
+        // Tepat / Hijau
         let tglStr = tglData !== "" ? tglData : "Belum ditentukan";
         boxTglTtd.innerHTML = `
-          <div class="text-emerald-700 font-extrabold text-lg mb-1">${tglStr}</div>
-          <div class="text-emerald-800 text-xs font-bold bg-emerald-200/60 inline-block px-3 py-1.5 rounded-lg border border-emerald-300 shadow-sm">
+          <div class="text-emerald-700 font-extrabold text-lg mb-1.5">${tglStr}</div>
+          <div class="text-emerald-800 text-xs font-bold bg-emerald-200/60 inline-flex px-3 py-1.5 rounded-lg border border-emerald-300 shadow-sm">
             Silahkan datang ke kantor BPS Kabupaten Lombok Barat
           </div>`;
         boxTglTtd.className = "leading-relaxed block p-4 rounded-xl border-2 border-emerald-300 bg-emerald-50 shadow-md transition-all";
       } 
       else {
-        // Kondisi Revisi (Merah)
+        // Kesalahan / Merah
         boxTglTtd.innerHTML = `
           <div class="flex items-start gap-2 text-rose-700">
             <svg class="w-5 h-5 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
@@ -324,10 +342,16 @@
 
       document.getElementById('d_catatanUpload').innerText = teksCatatan;
 
-      // Container catatan hanya muncul bila memenuhi syarat (Tanpa / Dengan)
-      const containerCatatan = document.getElementById('containerCatatan');
+      // Cek Kondisi SS Fasih
       if (isMemenuhiTanpaSyarat || isMemenuhiDenganSyarat) {
         containerCatatan.classList.remove('hidden');
+        if (ssFasih === "belum isi") {
+          catatanNormal.classList.add('hidden');
+          catatanPeringatan.classList.remove('hidden');
+        } else {
+          catatanNormal.classList.remove('hidden');
+          catatanPeringatan.classList.add('hidden');
+        }
       } else {
         containerCatatan.classList.add('hidden');
       }
